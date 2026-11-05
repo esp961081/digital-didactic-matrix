@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конструктор цифрової дидактичної матриці</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#20283a;--muted:#667085;--line:#dfe4ee;--accent:#3859b8;--soft:#edf1ff;--good:#e9f6ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+main{max-width:920px;margin:32px auto;padding:0 18px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin:16px 0;box-shadow:0 5px 20px rgba(25,40,80,.05)}
+h1{font-size:clamp(25px,4vw,34px);line-height:1.2;margin:0 0 8px}
+h2{font-size:21px;margin:0 0 14px}
+p{margin:7px 0}
+.muted,.hint{color:var(--muted)}
+label{display:block;font-weight:650;margin:0 0 7px}
+select,input,textarea{font:inherit;width:100%;border:1px solid #cbd3e1;border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink)}
+select:focus,input:focus,textarea:focus{outline:3px solid #dce4ff;border-color:var(--accent)}
+button{font:inherit;font-weight:650;border:0;border-radius:11px;padding:12px 17px;cursor:pointer;background:var(--accent);color:white}
+button.secondary{background:#eef1f7;color:#27334c;border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.field{margin:16px 0}
+.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.param{background:var(--soft);padding:14px;border-radius:12px}
+.param small{display:block;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.param strong{display:block;margin-top:4px}
+.steps{padding-left:22px}
+.steps li{margin:12px 0}
+.matrix-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{border:1px solid var(--line);padding:9px;vertical-align:top;text-align:left}
+th{background:#f0f3fa;font-size:13px}
+td input,td textarea{min-width:125px;border:0;background:#fafbfe;padding:7px}
+td textarea{min-height:68px;resize:vertical}
+.note{background:#fff8e8;border:1px solid #f0dfb5;padding:12px 14px;border-radius:11px}
+.hidden{display:none}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
+@media(max-width:600px){.card{padding:17px}main{margin:18px auto}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>Конструктор цифрової дидактичної матриці</h1>
+    <p class="muted">Оберіть навчальний предмет і отримайте індивідуальне методичне завдання.</p>
+    <div class="field">
+      <label for="subject">Навчальний предмет</label>
+      <select id="subject">
+        <option>Українська мова і література</option><option>Іноземна мова і література</option>
+        <option>Історія</option><option selected>Математика</option><option>Біологія</option>
+        <option>Хімія</option><option>Географія</option><option>Фізика та астрономія</option>
+        <option>Інформатика</option><option>Фізична культура</option><option>Технології</option>
+      </select>
+    </div>
+    <div class="actions"><button id="generate">Згенерувати завдання</button></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <section class="card">
+      <h2>Твої параметри</h2>
+      <div class="params">
+        <div class="param"><small>Дидактична мета</small><strong id="goalOut"></strong></div>
+        <div class="param"><small>Цифровий сервіс</small><strong id="serviceOut"></strong></div>
+        <div class="param"><small>Модель аналізу</small><strong id="modelOut"></strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Практичне завдання</h2>
+      <ol class="steps">
+        <li>Зареєструйтеся на сервісі <strong id="service1"></strong> та дослідіть функціонал його інструментів.</li>
+        <li>Для дидактичної мети <strong id="goal1"></strong> адаптуйте інструменти цього сервісу для навчання <strong id="subject1"></strong>.</li>
+        <li>Надайте стислий опис завдань для обраної теми уроку з предмета <strong id="subject2"></strong>, у яких передбачено використання відповідних інструментів сервісу <strong id="service2"></strong>.</li>
+      </ol>
+      <div class="field">
+        <label for="topic">Назва обраної теми уроку</label>
+        <input id="topic" placeholder="Вкажіть тему уроку">
+      </div>
+      <ol class="steps" start="4">
+        <li>Побудуйте цифрову дидактичну матрицю використання сервісу <strong id="service3"></strong> на етапах уроку згідно з таксономією Блума.</li>
+      </ol>
+      <div class="note"><strong>Структура матриці:</strong> №; Етап заняття / Змістова одиниця; Дидактична мета (за Блумом); Метод / Форма навчальної діяльності; Обраний ІКТ-інструмент та його функція; Форма оцінювання / Зворотний зв'язок.</div>
+      <div class="field">
+        <label>Цифрова дидактична матриця</label>
+        <div class="matrix-wrap">
+          <table id="matrix">
+            <thead><tr><th>№</th><th>Етап заняття / Змістова одиниця</th><th>Дидактична мета (за Блумом)</th><th>Метод / Форма навчальної діяльності</th><th>Обраний ІКТ-інструмент та його функція</th><th>Форма оцінювання / Зворотний зв'язок</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="actions"><button class="secondary" id="addRow">Додати етап заняття</button><button class="secondary" id="removeRow">Видалити останній етап</button></div>
+      </div>
+      <ol class="steps" start="5">
+        <li>Проведіть аналіз сервісу <strong id="service4"></strong> за допомогою моделі <strong id="model1"></strong>. Обґрунтуйте педагогічну доцільність його використання для навчання <strong id="subject3"></strong>.</li>
+      </ol>
+      <div class="field">
+        <label for="analysis">Аналіз сервісу за обраною моделлю</label>
+        <textarea id="analysis" rows="5" placeholder="Наведіть аргументований аналіз..."></textarea>
+      </div>
+      <div class="field">
+        <label for="conclusion">Висновок про педагогічну доцільність використання сервісу</label>
+        <textarea id="conclusion" rows="3" placeholder="Сформулюйте стислий висновок..."></textarea>
+      </div>
+      <div class="actions">
+        <button id="copy">Скопіювати результати роботи</button>
+        <button class="secondary" id="new">Згенерувати інше завдання</button>
+      </div>
+      <p id="status" class="hint" aria-live="polite"></p>
+    </section>
+  </section>
+  <footer>Навчальний симулятор · Конструктор цифрової дидактичної матриці</footer>
+</main>
+<script>
+const goals=[
+"Формування нового поняття",
+"Закріплення та застосування знань",
+"Розвиток критичного й аналітичного мислення",
+"Розвиток творчого мислення",
+"Дослідження проблеми",
+"Перевірка та оцінювання результатів навчання"
+];
+const services=["AR Book","Canva","Formative","Genially","H5P","Nearpod","Padlet","Wayground","Всеосвіта"];
+const models=["TPACK","SAMR","RAT"];
+let current={};
+const $=id=>document.getElementById(id);
+function pick(list){return list[Math.floor(Math.random()*list.length)]}
+function addRow(){
+ const body=$("matrix").querySelector("tbody"), n=body.rows.length+1, tr=document.createElement("tr");
+ const fields=["Етап / змістова одиниця","Дидактична мета","Метод / форма діяльності","Інструмент та функція","Оцінювання / зворотний зв'язок"];
+ tr.innerHTML='<td>'+n+'</td>'+fields.map((f,i)=>'<td><textarea aria-label="'+f+'" placeholder="'+f+'"></textarea></td>').join("");
+ body.appendChild(tr);
+}
+function resetMatrix(){ $("matrix").querySelector("tbody").innerHTML=""; for(let i=0;i<3;i++)addRow(); }
+function generate(){
+ current={subject:$("subject").value,goal:pick(goals),service:pick(services),model:pick(models)};
+ $("goalOut").textContent=current.goal;$("serviceOut").textContent=current.service;$("modelOut").textContent=current.model;
+ ["service1","service2","service3","service4"].forEach(id=>$(id).textContent=current.service);
+ ["subject1","subject2","subject3"].forEach(id=>$(id).textContent=current.subject);
+ $("goal1").textContent=current.goal;$("model1").textContent=current.model;
+ $("topic").value="";$("analysis").value="";$("conclusion").value="";
+ resetMatrix();$("result").classList.remove("hidden");$("status").textContent="";
+ $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function collect(){
+ const rows=[...$("matrix").querySelector("tbody").rows].map((tr,i)=>{
+ const v=[...tr.querySelectorAll("textarea")].map(x=>x.value.trim());
+ return [i+1,...v];
+ });
+ return {rows};
+}
+function copyResults(){
+ if(!$("topic").value.trim()){ $("status").textContent="Спочатку вкажіть тему уроку."; $("topic").focus();return; }
+ const {rows}=collect();
+ const textOut=[
+ "ЦИФРОВА ДИДАКТИЧНА МАТРИЦЯ",
+ "Предмет: "+current.subject,
+ "Дидактична мета: "+current.goal,
+ "Цифровий сервіс: "+current.service,
+ "Модель аналізу: "+current.model,
+ "Тема уроку: "+$("topic").value,
+ "",
+ "МАТРИЦЯ",
+ "№ | Етап заняття / Змістова одиниця | Дидактична мета (за Блумом) | Метод / Форма навчальної діяльності | Обраний ІКТ-інструмент та його функція | Форма оцінювання / Зворотний зв'язок",
+ ...rows.map(r=>r.join(" | ")),
+ "",
+ "АНАЛІЗ ЗА МОДЕЛЛЮ "+current.model,
+ $("analysis").value,
+ "",
+ "ВИСНОВОК",
+ $("conclusion").value
+ ].join("\n");
+ if(navigator.clipboard && navigator.clipboard.writeText){
+   navigator.clipboard.writeText(textOut).then(()=>$("status").textContent="Результати скопійовано.").catch(()=>fallbackCopy(textOut));
+ }else fallbackCopy(textOut);
+}
+function fallbackCopy(t){
+ const area=document.createElement("textarea");area.value=t;document.body.appendChild(area);area.select();
+ try{document.execCommand("copy");$("status").textContent="Результати скопійовано.";}catch(e){$("status").textContent="Не вдалося скопіювати автоматично. Виділіть і скопіюйте текст вручну.";}
+ area.remove();
+}
+$("generate").addEventListener("click",generate);
+$("new").addEventListener("click",generate);
+$("addRow").addEventListener("click",addRow);
+$("removeRow").addEventListener("click",()=>{const b=$("matrix").querySelector("tbody");if(b.rows.length>1)b.deleteRow(-1);});
+$("copy").addEventListener("click",copyResults);
+</script>
+</body>
+</html>
