@@ -104,7 +104,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
         <textarea id="conclusion" rows="3" placeholder="Сформулюйте стислий висновок..."></textarea>
       </div>
       <div class="actions">
-        <button id="copy">Скопіювати результати роботи</button>
+        <button id="downloadPdf">Завантажити PDF</button>
         <button class="secondary" id="new">Згенерувати інше завдання</button>
       </div>
       <p id="status" class="hint" aria-live="polite"></p>
@@ -150,41 +150,60 @@ function collect(){
  });
  return {rows};
 }
-function copyResults(){
- if(!$("topic").value.trim()){ $("status").textContent="Спочатку вкажіть тему уроку."; $("topic").focus();return; }
- const {rows}=collect();
- const textOut=[
- "ЦИФРОВА ДИДАКТИЧНА МАТРИЦЯ",
- "Предмет: "+current.subject,
- "Дидактична мета: "+current.goal,
- "Цифровий сервіс: "+current.service,
- "Модель аналізу: "+current.model,
- "Тема уроку: "+$("topic").value,
- "",
- "МАТРИЦЯ",
- "№ | Етап заняття / Змістова одиниця | Дидактична мета (за Блумом) | Метод / Форма навчальної діяльності | Обраний ІКТ-інструмент та його функція | Форма оцінювання / Зворотний зв'язок",
- ...rows.map(r=>r.join(" | ")),
- "",
- "АНАЛІЗ ЗА МОДЕЛЛЮ "+current.model,
- $("analysis").value,
- "",
- "ВИСНОВОК",
- $("conclusion").value
- ].join("\n");
- if(navigator.clipboard && navigator.clipboard.writeText){
-   navigator.clipboard.writeText(textOut).then(()=>$("status").textContent="Результати скопійовано.").catch(()=>fallbackCopy(textOut));
- }else fallbackCopy(textOut);
-}
-function fallbackCopy(t){
- const area=document.createElement("textarea");area.value=t;document.body.appendChild(area);area.select();
- try{document.execCommand("copy");$("status").textContent="Результати скопійовано.";}catch(e){$("status").textContent="Не вдалося скопіювати автоматично. Виділіть і скопіюйте текст вручну.";}
- area.remove();
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function downloadPDF(){
+ if(!$("topic").value.trim()){ $("status").textContent="Спочатку вкажіть тему уроку."; $("topic").focus(); return; }
+ const rows=[...$("matrix").querySelector("tbody").rows].map((tr,i)=>[i+1,...[...tr.querySelectorAll("textarea")].map(x=>x.value.trim())]);
+ const body=rows.map(r=>"<tr>"+r.map(v=>"<td>"+esc(v).replace(/\\n/g,"<br>")+"</td>").join("")+"</tr>").join("");
+ const date=new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"long",year:"numeric"}).format(new Date());
+ const report=`<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><title>Цифрова дидактична матриця</title>
+ <style>
+ @page{size:A4 landscape;margin:14mm}*{box-sizing:border-box}
+ body{font:10pt/1.45 Arial,"DejaVu Sans",sans-serif;color:#20283a;margin:0}
+ .top{border-bottom:4px solid #3859b8;padding-bottom:13px;margin-bottom:18px}
+ .eyebrow{color:#5269ae;text-transform:uppercase;letter-spacing:1.3px;font-size:8pt;font-weight:bold}
+ h1{font-size:23pt;line-height:1.15;margin:5px 0 4px}.sub{color:#667085;font-size:9pt}
+ .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:15px 0 20px}
+ .meta div{background:#edf1ff;border-radius:7px;padding:9px 11px}
+ .meta small{display:block;text-transform:uppercase;letter-spacing:.5px;color:#667085;font-size:7pt;font-weight:bold}
+ .meta strong{display:block;margin-top:4px;font-size:10pt}
+ h2{font-size:14pt;margin:18px 0 9px;color:#2b427f}
+ .topic{background:#f4f6fb;border-left:4px solid #3859b8;padding:10px 13px;margin:10px 0 17px}
+ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8pt}
+ th{background:#e9eefb;color:#263a70}th,td{border:1px solid #cbd3e1;padding:7px;vertical-align:top;overflow-wrap:anywhere}
+ th:first-child,td:first-child{width:4%;text-align:center}
+ th:nth-child(2),td:nth-child(2){width:17%}th:nth-child(3),td:nth-child(3){width:14%}
+ th:nth-child(4),td:nth-child(4){width:18%}th:nth-child(5),td:nth-child(5){width:25%}
+ th:nth-child(6),td:nth-child(6){width:22%}tbody tr:nth-child(even){background:#f8f9fc}
+ .answer{white-space:pre-wrap;background:#f7f8fb;border:1px solid #dfe4ee;border-radius:7px;padding:11px 13px;min-height:35px}
+ .footer{border-top:1px solid #dfe4ee;margin-top:22px;padding-top:8px;color:#7a8496;font-size:8pt;display:flex;justify-content:space-between}
+ .section{break-inside:avoid}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+ </style></head><body>
+ <header class="top"><div class="eyebrow">Навчальний практикум · Цифрова дидактика</div><h1>Цифрова дидактична матриця</h1><div class="sub">Результати виконання індивідуального методичного завдання</div></header>
+ <section class="meta">
+ <div><small>Навчальний предмет</small><strong>${esc(current.subject)}</strong></div>
+ <div><small>Дидактична мета</small><strong>${esc(current.goal)}</strong></div>
+ <div><small>Цифровий сервіс</small><strong>${esc(current.service)}</strong></div>
+ <div><small>Модель аналізу</small><strong>${esc(current.model)}</strong></div></section>
+ <div class="topic"><strong>Тема уроку:</strong> ${esc($("topic").value)}</div>
+ <h2>Цифрова дидактична матриця</h2>
+ <table><thead><tr><th>№</th><th>Етап заняття / Змістова одиниця</th><th>Дидактична мета (за Блумом)</th><th>Метод / Форма навчальної діяльності</th><th>Обраний ІКТ-інструмент та його функція</th><th>Форма оцінювання / Зворотний зв'язок</th></tr></thead><tbody>${body}</tbody></table>
+ <section class="section"><h2>Аналіз цифрового сервісу за моделлю ${esc(current.model)}</h2><div class="answer">${esc($("analysis").value)}</div></section>
+ <section class="section"><h2>Висновок про педагогічну доцільність</h2><div class="answer">${esc($("conclusion").value)}</div></section>
+ <div class="footer"><span>Конструктор цифрової дидактичної матриці</span><span>Сформовано: ${date}</span></div>
+ <script>window.addEventListener('load',()=>setTimeout(()=>{window.focus();window.print();},350));<\/script>
+ </body></html>`;
+ const win=window.open("","_blank");
+ if(!win){$("status").textContent="Браузер заблокував нове вікно. Дозвольте спливаючі вікна для цієї сторінки та повторіть спробу.";return;}
+ win.document.open();win.document.write(report);win.document.close();
+ $("status").textContent="У вікні друку оберіть «Зберегти як PDF».";
 }
 $("generate").addEventListener("click",generate);
 $("new").addEventListener("click",generate);
 $("addRow").addEventListener("click",addRow);
 $("removeRow").addEventListener("click",()=>{const b=$("matrix").querySelector("tbody");if(b.rows.length>1)b.deleteRow(-1);});
-$("copy").addEventListener("click",copyResults);
+$("downloadPdf").addEventListener("click",downloadPDF);
 </script>
 </body>
 </html>
