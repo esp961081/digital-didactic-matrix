@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Конструктор цифрової дидактичної матриці</title>
+<title>Генератор завдання</title>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#20283a;--muted:#667085;--line:#dfe4ee;--accent:#3859b8;--soft:#edf1ff;--good:#e9f6ef}
 *{box-sizing:border-box}
@@ -43,15 +43,16 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
 <body>
 <main>
   <section class="card">
-    <h1>Конструктор цифрової дидактичної матриці</h1>
+    <h1>Генератор завдання</h1>
     <p class="muted">Оберіть навчальний предмет і отримайте індивідуальне методичне завдання.</p>
     <div class="field">
       <label for="subject">Навчальний предмет</label>
       <select id="subject">
-        <option>Українська мова і література</option><option>Іноземна мова і література</option>
-        <option>Історія</option><option selected>Математика</option><option>Біологія</option>
-        <option>Хімія</option><option>Географія</option><option>Фізика та астрономія</option>
-        <option>Інформатика</option><option>Фізична культура</option><option>Технології</option>
+        <option>Українська мова</option><option>Українська література</option>
+        <option>Іноземна мова</option><option>Історія</option><option selected>Математика</option>
+        <option>Біологія</option><option>Хімія</option><option>Географія</option>
+        <option>Фізика</option><option>Астрономія</option><option>Інформатика</option>
+        <option>Фізична культура</option><option>Технології</option>
       </select>
     </div>
     <div class="actions"><button id="generate">Згенерувати завдання</button></div>
@@ -71,7 +72,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
       <h2>Практичне завдання</h2>
       <ol class="steps">
         <li>Зареєструйтеся на сервісі <strong id="service1"></strong> та дослідіть функціонал його інструментів.</li>
-        <li>Для дидактичної мети <strong id="goal1"></strong> адаптуйте інструменти цього сервісу для навчання <strong id="subject1"></strong>.</li>
+        <li>Для дидактичної мети <strong id="goal1"></strong> адаптуйте інструменти цього сервісу для навчання предмета <strong id="subject1"></strong>.</li>
         <li>Надайте стислий опис завдань для обраної теми уроку з предмета <strong id="subject2"></strong>, у яких передбачено використання відповідних інструментів сервісу <strong id="service2"></strong>.</li>
       </ol>
       <div class="field">
@@ -110,7 +111,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
       <p id="status" class="hint" aria-live="polite"></p>
     </section>
   </section>
-  <footer>Навчальний симулятор · Конструктор цифрової дидактичної матриці</footer>
+  <footer>Навчальний симулятор · Генератор завдання</footer>
 </main>
 <script>
 const goals=[
@@ -191,7 +192,7 @@ function downloadPDF(){
  <table><thead><tr><th>№</th><th>Етап заняття / Змістова одиниця</th><th>Дидактична мета (за Блумом)</th><th>Метод / Форма навчальної діяльності</th><th>Обраний ІКТ-інструмент та його функція</th><th>Форма оцінювання / Зворотний зв'язок</th></tr></thead><tbody>${body}</tbody></table>
  <section class="section"><h2>Аналіз цифрового сервісу за моделлю ${esc(current.model)}</h2><div class="answer">${esc($("analysis").value)}</div></section>
  <section class="section"><h2>Висновок про педагогічну доцільність</h2><div class="answer">${esc($("conclusion").value)}</div></section>
- <div class="footer"><span>Конструктор цифрової дидактичної матриці</span><span>Сформовано: ${date}</span></div>
+ <div class="footer"><span>Генератор завдання</span><span>Сформовано: ${date}</span></div>
  <script>window.addEventListener('load',()=>setTimeout(()=>{window.focus();window.print();},350));<\/script>
  </body></html>`;
  const win=window.open("","_blank");
