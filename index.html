@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Генератор завдання</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#20283a;--muted:#667085;--line:#dfe4ee;--accent:#3859b8;--soft:#edf1ff;--good:#e9f6ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+main{max-width:920px;margin:32px auto;padding:0 18px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;margin:16px 0;box-shadow:0 5px 20px rgba(25,40,80,.05)}
+h1{font-size:clamp(25px,4vw,34px);line-height:1.2;margin:0 0 8px}
+h2{font-size:21px;margin:0 0 14px}
+p{margin:7px 0}
+.muted,.hint{color:var(--muted)}
+label{display:block;font-weight:650;margin:0 0 7px}
+select,input,textarea{font:inherit;width:100%;border:1px solid #cbd3e1;border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink)}
+select:focus,input:focus,textarea:focus{outline:3px solid #dce4ff;border-color:var(--accent)}
+button{font:inherit;font-weight:650;border:0;border-radius:11px;padding:12px 17px;cursor:pointer;background:var(--accent);color:white}
+button.secondary{background:#eef1f7;color:#27334c;border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.field{margin:16px 0}
+.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.param{background:var(--soft);padding:14px;border-radius:12px}
+.param small{display:block;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.param strong{display:block;margin-top:4px}
+.steps{padding-left:22px}
+.steps li{margin:12px 0}
+.matrix-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{border:1px solid var(--line);padding:9px;vertical-align:top;text-align:left}
+th{background:#f0f3fa;font-size:13px}
+td input,td textarea{min-width:125px;border:0;background:#fafbfe;padding:7px}
+td textarea{min-height:68px;resize:vertical}
+.note{background:#fff8e8;border:1px solid #f0dfb5;padding:12px 14px;border-radius:11px}
+.hidden{display:none}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:8px}
+@media(max-width:600px){.card{padding:17px}main{margin:18px auto}.actions button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>Генератор завдання</h1>
+    <p class="muted">Оберіть навчальний предмет і цифровий сервіс. Дидактична мета та модель аналізу генеруються автоматично.</p>
+    <div class="field">
+      <label for="subject">Навчальний предмет</label>
+      <select id="subject">
+        <option>Українська мова</option><option>Українська література</option>
+        <option>Іноземна мова</option><option>Історія</option><option selected>Математика</option>
+        <option>Біологія</option><option>Хімія</option><option>Географія</option>
+        <option>Фізика</option><option>Астрономія</option><option>Інформатика</option>
+        <option>Фізична культура</option><option>Технології</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="service">Цифровий сервіс</label>
+      <select id="service" required>
+        <option value="" selected disabled>Оберіть цифровий сервіс</option>
+        <option>AR Book</option>
+        <option>Canva</option>
+        <option>Formative</option>
+        <option>Genially</option>
+        <option>H5P</option>
+        <option>Nearpod</option>
+        <option>Padlet</option>
+        <option>Wayground</option>
+        <option>Всеосвіта</option>
+      </select>
+    </div>
+    <p id="selectionStatus" class="hint" aria-live="polite"></p>
+    <div class="actions"><button id="generate">Згенерувати завдання</button></div>
+  </section>
+
+  <section id="result" class="hidden">
+    <section class="card">
+      <h2>Твої параметри</h2>
+      <div class="params">
+        <div class="param"><small>Дидактична мета</small><strong id="goalOut"></strong></div>
+        <div class="param"><small>Цифровий сервіс</small><strong id="serviceOut"></strong></div>
+        <div class="param"><small>Модель аналізу</small><strong id="modelOut"></strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Практичне завдання</h2>
+      <ol class="steps">
+        <li>Зареєструйтеся на сервісі <strong id="service1"></strong> та дослідіть функціонал його інструментів.</li>
+        <li>Для дидактичної мети <strong id="goal1"></strong> адаптуйте інструменти цього сервісу для навчання предмета <strong id="subject1"></strong>.</li>
+        <li>Надайте стислий опис завдань для обраної теми уроку з предмета <strong id="subject2"></strong>, у яких передбачено використання відповідних інструментів сервісу <strong id="service2"></strong>.</li>
+      </ol>
+      <div class="field">
+        <label for="topic">Назва обраної теми уроку</label>
+        <input id="topic" placeholder="Вкажіть тему уроку">
+      </div>
+      <ol class="steps" start="4">
+        <li>Побудуйте цифрову дидактичну матрицю використання сервісу <strong id="service3"></strong> на етапах уроку згідно з таксономією Блума.</li>
+      </ol>
+      <div class="note"><strong>Структура матриці:</strong> №; Етап заняття / Змістова одиниця; Дидактична мета (за Блумом); Метод / Форма навчальної діяльності; Обраний ІКТ-інструмент та його функція; Форма оцінювання / Зворотний зв'язок.</div>
+      <div class="field">
+        <label>Цифрова дидактична матриця</label>
+        <div class="matrix-wrap">
+          <table id="matrix">
+            <thead><tr><th>№</th><th>Етап заняття / Змістова одиниця</th><th>Дидактична мета (за Блумом)</th><th>Метод / Форма навчальної діяльності</th><th>Обраний ІКТ-інструмент та його функція</th><th>Форма оцінювання / Зворотний зв'язок</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="actions"><button class="secondary" id="addRow">Додати етап заняття</button><button class="secondary" id="removeRow">Видалити останній етап</button></div>
+      </div>
+      <ol class="steps" start="5">
+        <li>Проведіть аналіз сервісу <strong id="service4"></strong> за допомогою моделі <strong id="model1"></strong>. Обґрунтуйте педагогічну доцільність його використання для навчання <strong id="subject3"></strong>.</li>
+      </ol>
+      <div class="field">
+        <label for="analysis">Аналіз сервісу за обраною моделлю</label>
+        <textarea id="analysis" rows="5" placeholder="Наведіть аргументований аналіз..."></textarea>
+      </div>
+      <div class="field">
+        <label for="conclusion">Висновок про педагогічну доцільність використання сервісу</label>
+        <textarea id="conclusion" rows="3" placeholder="Сформулюйте стислий висновок..."></textarea>
+      </div>
+      <div class="actions">
+        <button id="downloadPdf">Завантажити PDF</button>
+        <button class="secondary" id="new">Згенерувати інше завдання</button>
+      </div>
+      <p id="status" class="hint" aria-live="polite"></p>
+    </section>
+  </section>
+  <footer>Навчальний симулятор · Генератор завдання</footer>
+</main>
+<script>
+const goals=[
+"Формування нового поняття",
+"Закріплення та застосування знань",
+"Розвиток критичного й аналітичного мислення",
+"Розвиток творчого мислення",
+"Дослідження проблеми",
+"Перевірка та оцінювання результатів навчання"
+];
+const services=["AR Book","Canva","Formative","Genially","H5P","Nearpod","Padlet","Wayground","Всеосвіта"];
+const models=["TPACK","SAMR","RAT"];
+let current={};
+const $=id=>document.getElementById(id);
+function pick(list){return list[Math.floor(Math.random()*list.length)]}
+function addRow(){
+ const body=$("matrix").querySelector("tbody"), n=body.rows.length+1, tr=document.createElement("tr");
+ const fields=["Етап / змістова одиниця","Дидактична мета","Метод / форма діяльності","Інструмент та функція","Оцінювання / зворотний зв'язок"];
+ tr.innerHTML='<td>'+n+'</td>'+fields.map((f,i)=>'<td><textarea aria-label="'+f+'" placeholder="'+f+'"></textarea></td>').join("");
+ body.appendChild(tr);
+}
+function resetMatrix(){ $("matrix").querySelector("tbody").innerHTML=""; for(let i=0;i<3;i++)addRow(); }
+function generate(){
+ const selectedService=$("service").value;
+ if(!selectedService){
+   $("selectionStatus").textContent="Спочатку оберіть цифровий сервіс.";
+   $("service").focus();
+   return;
+ }
+ $("selectionStatus").textContent="";
+ current={subject:$("subject").value,goal:pick(goals),service:selectedService,model:pick(models)};
+ $("goalOut").textContent=current.goal;$("serviceOut").textContent=current.service;$("modelOut").textContent=current.model;
+ ["service1","service2","service3","service4"].forEach(id=>$(id).textContent=current.service);
+ ["subject1","subject2","subject3"].forEach(id=>$(id).textContent=current.subject);
+ $("goal1").textContent=current.goal;$("model1").textContent=current.model;
+ $("topic").value="";$("analysis").value="";$("conclusion").value="";
+ resetMatrix();$("result").classList.remove("hidden");$("status").textContent="";
+ $("result").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function collect(){
+ const rows=[...$("matrix").querySelector("tbody").rows].map((tr,i)=>{
+ const v=[...tr.querySelectorAll("textarea")].map(x=>x.value.trim());
+ return [i+1,...v];
+ });
+ return {rows};
+}
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function downloadPDF(){
+ if(!$("topic").value.trim()){ $("status").textContent="Спочатку вкажіть тему уроку."; $("topic").focus(); return; }
+ const rows=[...$("matrix").querySelector("tbody").rows].map((tr,i)=>[i+1,...[...tr.querySelectorAll("textarea")].map(x=>x.value.trim())]);
+ const body=rows.map(r=>"<tr>"+r.map(v=>"<td>"+esc(v).replace(/\\n/g,"<br>")+"</td>").join("")+"</tr>").join("");
+ const date=new Intl.DateTimeFormat("uk-UA",{day:"2-digit",month:"long",year:"numeric"}).format(new Date());
+ const report=`<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><title>Цифрова дидактична матриця</title>
+ <style>
+ @page{size:A4 landscape;margin:14mm}*{box-sizing:border-box}
+ body{font:10pt/1.45 Arial,"DejaVu Sans",sans-serif;color:#20283a;margin:0}
+ .top{border-bottom:4px solid #3859b8;padding-bottom:13px;margin-bottom:18px}
+ .eyebrow{color:#5269ae;text-transform:uppercase;letter-spacing:1.3px;font-size:8pt;font-weight:bold}
+ h1{font-size:23pt;line-height:1.15;margin:5px 0 4px}.sub{color:#667085;font-size:9pt}
+ .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:15px 0 20px}
+ .meta div{background:#edf1ff;border-radius:7px;padding:9px 11px}
+ .meta small{display:block;text-transform:uppercase;letter-spacing:.5px;color:#667085;font-size:7pt;font-weight:bold}
+ .meta strong{display:block;margin-top:4px;font-size:10pt}
+ h2{font-size:14pt;margin:18px 0 9px;color:#2b427f}
+ .topic{background:#f4f6fb;border-left:4px solid #3859b8;padding:10px 13px;margin:10px 0 17px}
+ table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:8pt}
+ th{background:#e9eefb;color:#263a70}th,td{border:1px solid #cbd3e1;padding:7px;vertical-align:top;overflow-wrap:anywhere}
+ th:first-child,td:first-child{width:4%;text-align:center}
+ th:nth-child(2),td:nth-child(2){width:17%}th:nth-child(3),td:nth-child(3){width:14%}
+ th:nth-child(4),td:nth-child(4){width:18%}th:nth-child(5),td:nth-child(5){width:25%}
+ th:nth-child(6),td:nth-child(6){width:22%}tbody tr:nth-child(even){background:#f8f9fc}
+ .answer{white-space:pre-wrap;background:#f7f8fb;border:1px solid #dfe4ee;border-radius:7px;padding:11px 13px;min-height:35px}
+ .footer{border-top:1px solid #dfe4ee;margin-top:22px;padding-top:8px;color:#7a8496;font-size:8pt;display:flex;justify-content:space-between}
+ .section{break-inside:avoid}@media print{body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+ </style></head><body>
+ <header class="top"><div class="eyebrow">Навчальний практикум · Цифрова дидактика</div><h1>Цифрова дидактична матриця</h1><div class="sub">Результати виконання індивідуального методичного завдання</div></header>
+ <section class="meta">
+ <div><small>Навчальний предмет</small><strong>${esc(current.subject)}</strong></div>
+ <div><small>Дидактична мета</small><strong>${esc(current.goal)}</strong></div>
+ <div><small>Цифровий сервіс</small><strong>${esc(current.service)}</strong></div>
+ <div><small>Модель аналізу</small><strong>${esc(current.model)}</strong></div></section>
+ <div class="topic"><strong>Тема уроку:</strong> ${esc($("topic").value)}</div>
+ <h2>Цифрова дидактична матриця</h2>
+ <table><thead><tr><th>№</th><th>Етап заняття / Змістова одиниця</th><th>Дидактична мета (за Блумом)</th><th>Метод / Форма навчальної діяльності</th><th>Обраний ІКТ-інструмент та його функція</th><th>Форма оцінювання / Зворотний зв'язок</th></tr></thead><tbody>${body}</tbody></table>
+ <section class="section"><h2>Аналіз цифрового сервісу за моделлю ${esc(current.model)}</h2><div class="answer">${esc($("analysis").value)}</div></section>
+ <section class="section"><h2>Висновок про педагогічну доцільність</h2><div class="answer">${esc($("conclusion").value)}</div></section>
+ <div class="footer"><span>Генератор завдання</span><span>Сформовано: ${date}</span></div>
+ <script>window.addEventListener('load',()=>setTimeout(()=>{window.focus();window.print();},350));<\/script>
+ </body></html>`;
+ const win=window.open("","_blank");
+ if(!win){$("status").textContent="Браузер заблокував нове вікно. Дозвольте спливаючі вікна для цієї сторінки та повторіть спробу.";return;}
+ win.document.open();win.document.write(report);win.document.close();
+ $("status").textContent="У вікні друку оберіть «Зберегти як PDF».";
+}
+$("generate").addEventListener("click",generate);
+$("new").addEventListener("click",generate);
+$("addRow").addEventListener("click",addRow);
+$("removeRow").addEventListener("click",()=>{const b=$("matrix").querySelector("tbody");if(b.rows.length>1)b.deleteRow(-1);});
+$("downloadPdf").addEventListener("click",downloadPDF);
+</script>
+</body>
+</html>
